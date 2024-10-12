@@ -1,0 +1,11 @@
+SECRET_KEY=your_django_secret_key
+DEBUG=your_debug_status
+DB_NAME=your_database_name
+DB_HOST=your_database_host
+DB_PORT=your_database_port
+DB_PASS=your_database_password
+DB_USER=your_database_username
+EMAIL=your_email_smtp
+EMAIL_PASS=your_app_smtp_password
+CASHED_ENABLED=your_cashed_status
+CACHES_LOCATION=your_redis_host_location
