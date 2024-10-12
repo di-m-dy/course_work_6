@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<main>
+    <div class="container my-2">
+        {% if warning_text %}
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                {% for text in warning_text %}
+                <p><b>{{ text.0 }}:</b> {{ text.1 }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="bg-body-tertiary p-4 rounded">
+            <div class="container my-3">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="container row">
+                        <div class="col-6">
+                            <h5 class="mb-3">Регистрация:</h5>
+                            {{ form.as_p }}
+                            <div class="row">
+                                <div class="col-6">
+                                    <button type="submit" class="btn btn-primary mt-4 mb-2 w-100">Регистрация</button>
+                                </div>
+                                <div class="col-6">
+                                    <a class="btn btn-secondary mt-4 mb-2 w-100"
+                                       href="{% url 'catalog:index' %}">Отмена</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
