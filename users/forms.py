@@ -1,6 +1,6 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
-from user.models import User
+from users.models import User
 
 
 class FormControlMixin:
@@ -19,7 +19,14 @@ class UserRegisterForm(FormControlMixin, UserCreationForm):
         fields = ('email', 'password1', 'password2')
 
 
+
+class LoginForm(FormControlMixin, AuthenticationForm):
+    class Meta:
+        fields = ('email', 'password')
+
+
+
 class ProfileForm(FormControlMixin, forms.ModelForm):
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'phone', 'avatar', 'country')
+        fields = ('email', 'first_name', 'last_name', 'phone')

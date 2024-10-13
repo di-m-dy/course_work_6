@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Войти{% endblock %}
+{% block content %}
+{% if warning_text %}
+<div class="col-12">
+    <div class="alert alert-warning" role="alert">
+        {% for text in warning_text %}
+        <p><b>{{ text.0 }}:</b> {{ text.1 }}</p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+<div class="border p-4 rounded-3">
+    <div class="col-12">
+        <h4 class="mb-4">Вход:</h4>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col-12">
+                <div class="col-12">
+                    {{ form.as_p }}
+                    <div class="col-6">
+                        <a class="mt-4 mb-2 w-100 text-secondary"
+                           href="{% url 'users:reset_password' %}">Сбросить пароль</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-outline-secondary mt-4 mb-2 w-100">Войти</button>
+                        </div>
+                        <div class="col-6">
+                            <a class="btn btn-secondary mt-4 mb-2 w-100"
+                               href="#">Отмена</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
