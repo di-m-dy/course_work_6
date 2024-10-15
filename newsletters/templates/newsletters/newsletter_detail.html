@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Newsletter#{{ newsletter.pk }}{% endblock %}
+{% block content %}
+<div class="shadow rounded-3 m-4">
+    <div class="p-4 my-2 bg-body-tertiary rounded-3">
+        <h3>Рассылка #{{ newsletter.pk }}</h3>
+        <p><small class="text-secondary">{{ newsletter.created_at }}</small></p>
+        <div>
+            <a class="btn btn-outline-secondary">Редактировать</a>
+            <a class="btn btn-outline-secondary">Удалить</a>
+        </div>
+    </div>
+    <div class="list-group list-group-flush container p-2 my-2">
+        <a class="list-group-item list-group-item-action"aria-current="true">
+            <b>Статус:</b> {{ newsletter.get_status_display }}
+        </a>
+        <a class="list-group-item list-group-item-action"aria-current="true">
+            <b>Периодичность:</b> {{ newsletter.get_period_display }}
+        </a>
+        <a class="list-group-item list-group-item-action"aria-current="true">
+            <b>Дата первой рассылки:</b> {{ newsletter.date_time }}
+        </a>
+        <a class="list-group-item list-group-item-action"
+           aria-current="true">
+            <b>Сообщение:</b> {{ newsletter.message.title }}
+        </a>
+        <a class="list-group-item list-group-item-action"
+           aria-current="true">
+            <b>Клиенты</b> <span class="badge text-bg-primary rounded-pill mx-3"> {{ newsletter.clients.count }}</span>
+        </a>
+        {% if newsletter.set_newsletterreport %}
+        <a class="list-group-item list-group-item-action"
+           aria-current="true">
+            <b>Отчеты</b> <span class="badge text-bg-primary rounded-pill mx-3"> {{ newsletter.set_newsletterreport.count }}</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
