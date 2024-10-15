@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load my_tags %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+{% include 'include/title.html' with title='Удаление поста!' body='Вы точно хотите удалить пост?' %}
+<div class="my-2">
+    <div class="card border mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ object.title }}</h5>
+            <p class="card-text">{{ object.text|slice:":100" }}...</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-outline-danger w-100 mt-4 mb-2">Удалить</button>
+                    </div>
+                    <div class="col-6">
+                        <a class="btn btn-secondary w-100 mt-4 mb-2" href="{% url 'blog:blog' %}">Отмена</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Add Post{% endblock %}
+{% block content %}
+<div class="border p-4 rounded">
+    <div class="col-12">
+        <h4 class="mb-4">Добавить пост</h4>
+        <form class="row g-3" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if object %}
+            <div class="row">
+                <div class="col-6">
+                    <button type="submit" class="btn btn-outline-secondary w-100 mt-4 mb-2">Cохранить</button>
+                </div>
+                {% else %}
+                <div class="col-6">
+                    <button type="submit" class="btn btn-outline-secondary w-100 mt-4 mb-2">Создать</button>
+                </div>
+                {% endif %}
+                <div class="col-6">
+                    <a class="btn btn-secondary w-100 w-100 mt-4 mb-2" href="{% url 'blog:blog' %}">Отмена</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
