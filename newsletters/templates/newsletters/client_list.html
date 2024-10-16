@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load my_tags %}
+{% block title %}Newsletters{% endblock %}
+{% block content %}
+{% include 'include/title.html' with title="Ваши Клиенты" body="На это странице вы найдете свою клиентскую базу." %}
+<div>
+    <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_client' %}">Новый клиент</a>
+</div>
+<div class="p-1 rounded col-12 my-2">
+    <div class="card py-2 px-1 overflow-auto">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Фамилия</th>
+                <th scope="col">Имя</th>
+                <th scope="col">Отчество</th>
+                <th scope="col">email</th>
+                <th scope="col">Комментарий</th>
+                <th scope="col">created_at</th>
+                <th scope="col">edit</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for client in page_obj %}
+            <tr>
+                <th scope="row">{{ client.pk }}</th>
+                <td>{{ client.last_name }}</td>
+                <td>{{ client.first_name }}</td>
+                <td>{{ client.parent_name }}</td>
+                <td>{{ client.email }}</td>
+                {% if client.comment %}
+                <td>{{ client.comment }}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+                <td>{{ client.created_at }}</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'newsletters:update_client' client.pk %}">edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--pagination-->
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4" aria-label="Page navigation example">
+    <ul class="pagination pagination-sm justify-content-center">
+        {% if page_obj.number > 1 %}
+        <li class="page-item">
+            <a href="?{{ params }}&page={{ page_obj.previous_page_number }}" class="page-link">Prev</a>
+        </li>
+        <li class="page-item"><a class="page-link" href="?{{ params }}&page=1">1</a></li>
+        {% endif %}
+        <li class="page-item disabled"><a class="page-link fs-3">{{ page_obj.number }}</a></li>
+        {% if page_obj.number < page_obj.paginator.num_pages %}
+        <li class="page-item"><a class="page-link" href="?{{ params }}&page={{ page_obj.paginator.num_pages }}">{{
+            page_obj.paginator.num_pages }}</a></li>
+        <li class="page-item">
+            <a class="page-link" href="?{{ params }}&page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

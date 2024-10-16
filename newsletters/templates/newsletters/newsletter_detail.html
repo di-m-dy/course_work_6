@@ -6,8 +6,8 @@
         <h3>Рассылка #{{ newsletter.pk }}</h3>
         <p><small class="text-secondary">{{ newsletter.created_at }}</small></p>
         <div>
-            <a class="btn btn-outline-secondary">Редактировать</a>
-            <a class="btn btn-outline-secondary">Удалить</a>
+            <a href="{% url 'newsletters:update_newsletter' newsletter.pk %}" class="btn btn-outline-secondary">Редактировать</a>
+            <a href="{% url 'newsletters:delete_newsletter' newsletter.pk %}" class="btn btn-outline-secondary">Удалить</a>
         </div>
     </div>
     <div class="list-group list-group-flush container p-2 my-2">

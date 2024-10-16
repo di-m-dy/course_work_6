@@ -33,7 +33,7 @@
                 <p class="card-text text-secondary"><small>{{ post.created_at }}</small></p>
                 <h5>{{ post.title }}</h5>
                 <p class="card-text">{{ post.text|slice:99 }}...</p>
-                <a href="{% url 'blog:post' post.pk %}">Продолжить читать</a>
+                <a class="btn btn-outline-secondary" href="{% url 'blog:post' post.pk %}">Читать</a>
             </div>
         </div>
     </div>

@@ -1,10 +1,6 @@
 from django.db import models
 from users.models import User
 
-# Client +
-# Message +
-# Newsletter +
-# NewsletterReport
 
 class Client(models.Model):
     """
@@ -32,7 +28,7 @@ class Message(models.Model):
     Сообщение для рассылки
     """
     user = models.ForeignKey(User, verbose_name='Пользователь рассылок', on_delete=models.CASCADE)
-    title = models.CharField(max_length=100, verbose_name='Тема сообщения')
+    title = models.CharField(max_length=100, verbose_name='Заголовок сообщения')
     text = models.TextField(verbose_name='Текст сообщения')
 
     def __str__(self):

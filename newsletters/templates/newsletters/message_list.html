@@ -4,6 +4,9 @@
 {% block title %}Messages{% endblock %}
 {% block content %}
 {% include 'include/title.html' with title="Ваши Сообщения" body="На это странице вы найдете список всех своих сообщений для рассылок." %}
+<div>
+    <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_message' %}">Новое сообщение</a>
+</div>
 {% for message in page_obj %}
 <div class="p-2 rounded col-12 my-2">
     <div class="card">
@@ -11,7 +14,7 @@
             <h6>Сообщение #{{ message.pk }}</h6>
             <h5>{{ message.title }}</h5>
             <p class="card-text">{{ message.text|slice:":50" }}</p>
-            <a href="#" class="btn btn-outline-secondary">Подробно</a>
+            <a href="{% url 'newsletters:message_detail' message.pk %}" class="btn btn-outline-secondary">Подробно</a>
         </div>
     </div>
 </div>

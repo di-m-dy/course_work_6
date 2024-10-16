@@ -3,7 +3,10 @@
 {% load my_tags %}
 {% block title %}Newsletters{% endblock %}
 {% block content %}
-{% include 'include/title.html' with title="Ваши рассылки" body="На это странице вы найдете список всех своих рассылок." %}
+{% include 'include/title.html' with title="Ваши Рассылки" body="На это странице вы найдете список всех своих рассылок." %}
+<div>
+    <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_newsletter' %}">Новая рассылка</a>
+</div>
 {% for newsletter in page_obj %}
 <div class="p-2 rounded col-12 my-2">
     <div class="card">

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Add Newsletter{% endblock %}
+{% block title %}Add Message{% endblock %}
 {% block content %}
 <div class="border p-4 rounded">
     <div class="col-12">
         {% if object %}
-        <h4 class="mb-4">Редактировать рассылку</h4>
+        <h4 class="mb-4">Редактировать сообщение</h4>
         {% else %}
-        <h4 class="mb-4">Добавить рассылку</h4>
+        <h4 class="mb-4">Добавить сообщение</h4>
         {% endif %}
         <form class="row g-3" method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -17,14 +17,14 @@
                     <button type="submit" class="btn btn-outline-secondary w-100 mt-4 mb-2">Cохранить</button>
                 </div>
                 <div class="col-6">
-                    <a class="btn btn-secondary w-100 w-100 mt-4 mb-2" href="{% url 'newsletters:newsletter_detail' newsletter.pk %}">Отмена</a>
+                    <a class="btn btn-secondary w-100 w-100 mt-4 mb-2" href="{% url 'newsletters:message_detail' message.pk %}">Отмена</a>
                 </div>
                 {% else %}
                 <div class="col-6">
                     <button type="submit" class="btn btn-outline-secondary w-100 mt-4 mb-2">Создать</button>
                 </div>
                 <div class="col-6">
-                    <a class="btn btn-secondary w-100 w-100 mt-4 mb-2" href="{% url 'newsletters:newsletter_list' %}">Отмена</a>
+                    <a class="btn btn-secondary w-100 w-100 mt-4 mb-2" href="{% url 'newsletters:message_list' %}">Отмена</a>
                 </div>
                 {% endif %}
             </div>

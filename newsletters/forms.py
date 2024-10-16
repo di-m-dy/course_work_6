@@ -1,5 +1,5 @@
 from django import forms
-from newsletters.models import Newsletter, Client
+from newsletters.models import Newsletter, Client, Message
 
 
 class FormControlMixin:
@@ -30,3 +30,21 @@ class NewsletterForm(FormControlMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['clients'].queryset = Client.objects.filter(user=user)
+
+
+class MessageForm(FormControlMixin, forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ('title', 'text')
+
+
+class ClientForm(FormControlMixin, forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = (
+            'first_name',
+            'last_name',
+            'parent_name',
+            'email',
+            'comment'
+        )
