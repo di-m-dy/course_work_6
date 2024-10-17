@@ -3,7 +3,11 @@
 {% load my_tags %}
 {% block title %}Newsletters{% endblock %}
 {% block content %}
+{% if get_newsletter %}
+{% include 'include/title.html' with title="Клиенты Рассылки" body=get_newsletter %}
+{% else %}
 {% include 'include/title.html' with title="Ваши Клиенты" body="На это странице вы найдете свою клиентскую базу." %}
+{% endif %}
 <div>
     <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_client' %}">Новый клиент</a>
 </div>

@@ -9,13 +9,23 @@ from newsletters.views import (NewsletterListView,
                                MessageCreateView,
                                MessageUpdateView,
                                MessageDeleteView,
-                               ClientListView, ClientCreateView, ClientUpdateView)
+                               ClientListView,
+                               ClientCreateView,
+                               ClientUpdateView,
+                               NewsletterReportListView,
+                               start_sending,
+                               stop_sending,
+                               HomeListView)
 
 app_name = 'newsletters'
 
 urlpatterns = [
+    path('', HomeListView.as_view(), name='home'),
     path('newsletters', NewsletterListView.as_view(), name='newsletter_list'),
     path('newsletters/<int:pk>', NewsletterDetailView.as_view(), name='newsletter_detail'),
+    path('newsletters/<int:newsletter_id>/report', NewsletterReportListView.as_view(), name='newsletter_report'),
+    path('newsletters/<int:newsletter_id>/start_sending', start_sending, name='start_sending'),
+    path('newsletters/<int:newsletter_id>/stop_sending', stop_sending, name='stop_sending'),
     path('newsletters/add', NewsletterCreateView.as_view(), name='add_newsletter'),
     path('newsletters/update/<int:pk>', NewsletterUpdateView.as_view(), name='update_newsletter'),
     path('newsletters/delete/<int:pk>', NewsletterDeleteView.as_view(), name='delete_newsletter'),

@@ -1,10 +1,34 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, DetailView, ListView, DeleteView
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, UpdateView, DetailView, ListView, DeleteView, TemplateView
 
+from blog.models import Blog
 from newsletters.forms import NewsletterForm, MessageForm, ClientForm
-from newsletters.models import Newsletter, Message, Client
+from newsletters.models import Newsletter, Message, Client, NewsletterReport
+from newsletters.services import send_newsletter
+from users.models import User
+
+
+class HomeListView(LoginRequiredMixin, TemplateView):
+    """
+    Главная страница
+    """
+    model = Newsletter
+    template_name = 'newsletters/home.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        user = self.request.user
+        newsletters = Newsletter.objects.filter(user=user)
+        data['newsletters'] = newsletters
+        clients = Client.objects.filter(user=user)
+        data['clients'] = clients
+        active_newsletters = newsletters.filter(status='active')
+        data['active_newsletters'] = active_newsletters
+        posts = Blog.objects.all().order_by('-views_count')[:3]
+        data['posts'] = posts
+        return data
 
 
 class NewsletterListView(LoginRequiredMixin, ListView):
@@ -19,12 +43,24 @@ class NewsletterListView(LoginRequiredMixin, ListView):
         data = Newsletter.objects.filter(user=user).order_by('-created_at')
         return data
 
+
 class NewsletterDetailView(LoginRequiredMixin, DetailView):
     """
     Отображение информации о рассылке
     """
     model = Newsletter
     context_object_name = 'newsletter'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        data['reports'] = NewsletterReport.objects.filter(newsletter=self.object)
+        if self.object.status == 'created' or (self.object.status == 'closed' and self.object.period != 'once'):
+            data['run_send'] = 'start'
+        elif self.object.status == 'active':
+            data['run_send'] = 'stop'
+        else:
+            data['run_send'] = None
+        return data
 
 
 class NewsletterCreateView(CreateView):
@@ -70,6 +106,7 @@ class NewsletterUpdateView(UpdateView):
         form.save()
         return super().form_valid(form)
 
+
 class NewsletterDeleteView(DeleteView):
     model = Newsletter
 
@@ -82,6 +119,7 @@ class MessageListView(LoginRequiredMixin, ListView):
         user = self.request.user
         data = Message.objects.filter(user=user).order_by('title')
         return data
+
 
 class MessageDetailView(DetailView):
     model = Message
@@ -100,6 +138,7 @@ class MessageCreateView(CreateView):
         form.save()
         return super().form_valid(form)
 
+
 class MessageUpdateView(UpdateView):
     model = Message
     form_class = MessageForm
@@ -113,6 +152,7 @@ class MessageUpdateView(UpdateView):
         form.save()
         return super().form_valid(form)
 
+
 class MessageDeleteView(DeleteView):
     model = Message
 
@@ -124,6 +164,15 @@ class ClientListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         data = Client.objects.filter(user=user).order_by('-created_at')
+        if self.request.GET.get('newsletter'):
+            newsletter = get_object_or_404(Newsletter, pk=self.request.GET.get('newsletter'))
+            data = newsletter.clients.all()
+        return data
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        if self.request.GET.get('newsletter'):
+            data['get_newsletter'] = f"Рассылка #{self.request.GET.get('newsletter')}"
         return data
 
 
@@ -153,3 +202,42 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         form.instance.user = self.request.user
         form.save()
         return super().form_valid(form)
+
+
+class NewsletterReportListView(LoginRequiredMixin, ListView):
+    model = NewsletterReport
+    paginate_by = 30
+
+    def get_queryset(self):
+        newsletter_id = self.kwargs.get('newsletter_id')
+        newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
+        data = NewsletterReport.objects.filter(newsletter=newsletter).order_by('-date_time')
+        return data
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        newsletter_id = self.kwargs.get('newsletter_id')
+        newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
+        data['newsletter'] = newsletter
+        return data
+
+
+def start_sending(request, newsletter_id):
+    newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
+    if newsletter.status == 'closed':
+        send_newsletter(newsletter)
+    newsletter.status = 'active'
+    newsletter.save()
+    return redirect(reverse('newsletters:newsletter_detail', args=[newsletter_id]))
+
+
+def stop_sending(request, newsletter_id):
+    newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
+    newsletter.status = 'closed'
+    newsletter.save()
+    NewsletterReport.objects.create(
+        newsletter=newsletter,
+        is_success=False,
+        report='Рассылка остановлена'
+    )
+    return redirect(reverse('newsletters:newsletter_detail', args=[newsletter_id]))

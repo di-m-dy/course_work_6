@@ -11,10 +11,10 @@
 <div class="p-2 rounded col-12 my-2">
     <div class="card">
         <div class="card-body col-10">
-            <p class="card-text text-secondary"><small>{{ newsletter.created_at }}</small></p>
+            <p class="card-text text-secondary"><small>{{ newsletter.get_status_display }}</small></p>
             <h6>Рассылка #{{ newsletter.pk }}</h6>
             <h5>{{ newsletter.message.title }}</h5>
-            <p class="card-text"><small class="text-secondary">Дата и время: {{ newsletter.date_time }}</small></p>
+            <p class="card-text"><small class="text-secondary">Время первой рассылки: {{ newsletter.date_time }}</small></p>
             <p class="card-text">Сообщение: {{ newsletter.message.text|slice:":50" }}</p>
             <a href="{% url 'newsletters:newsletter_detail' newsletter.pk %}" class="btn btn-outline-secondary">Подробно</a>
         </div>

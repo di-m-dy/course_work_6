@@ -21,19 +21,30 @@
             <b>Дата первой рассылки:</b> {{ newsletter.date_time }}
         </a>
         <a class="list-group-item list-group-item-action"
-           aria-current="true">
+           aria-current="true" href="{% url 'newsletters:message_detail' newsletter.message.pk %}">
             <b>Сообщение:</b> {{ newsletter.message.title }}
         </a>
         <a class="list-group-item list-group-item-action"
-           aria-current="true">
+           aria-current="true" href="{% url 'newsletters:client_list' %}?newsletter={{ newsletter.pk }}">
             <b>Клиенты</b> <span class="badge text-bg-primary rounded-pill mx-3"> {{ newsletter.clients.count }}</span>
         </a>
-        {% if newsletter.set_newsletterreport %}
+        {% if reports %}
         <a class="list-group-item list-group-item-action"
-           aria-current="true">
-            <b>Отчеты</b> <span class="badge text-bg-primary rounded-pill mx-3"> {{ newsletter.set_newsletterreport.count }}</span>
+           aria-current="true" href="{% url 'newsletters:newsletter_report' newsletter.pk %}">
+            <b>Отчеты</b> <span class="badge text-bg-primary rounded-pill mx-3"> {{ reports.count }}</span>
         </a>
         {% endif %}
     </div>
+    {% if run_send %}
+    {% if run_send == 'start' %}
+    <div class="container p-4 my-2">
+        <a href="{% url 'newsletters:start_sending' newsletter.pk %}" class="btn btn-outline-primary">Запустить</a>
+    </div>
+    {% else %}
+    <div class="container p-4 my-2">
+        <a href="{% url 'newsletters:stop_sending' newsletter.pk %}" class="btn btn-outline-primary">Остановить</a>
+    </div>
+    {% endif %}
+    {% endif %}
 </div>
 {% endblock %}

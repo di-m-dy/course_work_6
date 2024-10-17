@@ -7,8 +7,10 @@
             </svg>
             <span class="fs-4"><b>Newsletter</b> Service</span>
         </a>
+        {% if request.user.email %}
         <div class="d-flex align-items-center text-body-emphasis text-decoration-none mx-4">
-            <a class="btn btn-sm btn-outline-primary rounded-4"><small>{{ request.user }}</small></a>
+            <a href="{% url 'users:logout_confirm' %}" class="btn btn-sm btn-outline-primary rounded-4"><small>{{ request.user }}</small></a>
         </div>
+        {% endif %}
     </header>
 </div>

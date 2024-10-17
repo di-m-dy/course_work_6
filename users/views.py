@@ -83,3 +83,6 @@ def reset_password(request):
         else:
             return render(request, 'users/error_reset_password.html')
     return render(request, 'users/reset_password.html')
+
+def logout_confirm(request):
+    return render(request, 'users/logout_confirm.html')
