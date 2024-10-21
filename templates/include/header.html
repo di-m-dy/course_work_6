@@ -1,20 +1,14 @@
 {% load my_user_tags %}
 <div class="container">
     <header class="d-flex py-2 mb-2 border-bottom">
-        {% if request.user|manager %}
-        <a href="{% url 'newsletters:manager_user_list' %}" class="d-flex align-items-center text-body-emphasis text-decoration-none">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-send mx-2"
-                 viewBox="0 0 16 16">
-                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
-            </svg>
-            <span class="fs-4"><b>Admin</b> Panel</span>
-        </a>
-        {% else %}
         <a href="/" class="d-flex align-items-center text-body-emphasis text-decoration-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-send mx-2"
                  viewBox="0 0 16 16">
                 <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
             </svg>
+            {% if request.user|manager %}
+            <span class="fs-4"><b>Admin</b> Panel</span>
+            {% else %}
             <span class="fs-4"><b>Newsletter</b> Service</span>
         </a>
         {% endif %}

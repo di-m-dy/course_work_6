@@ -12,13 +12,6 @@ from newsletters.services import send_newsletter
 from users.models import User
 
 
-class CheckSimpleUser(UserPassesTestMixin):
-    """
-    Миксин проверяет: не является ли пользователь менеджером или суперпользователем
-    """
-    def test_func(self):
-        return not self.request.user.is_superuser and not self.request.user.groups.filter(name='manager').exists()
-
 
 class CheckManager(UserPassesTestMixin):
     """
@@ -56,12 +49,17 @@ class ManagerUserListView(ListView):
         ]
         return data
 
-class HomeListView(CheckSimpleUser, TemplateView):
+class HomeListView(LoginRequiredMixin, TemplateView):
     """
     Главная страница
     """
     model = Newsletter
     template_name = 'newsletters/home.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='manager').exists():
+            return redirect(reverse_lazy('newsletters:manager_user_list'))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data()
