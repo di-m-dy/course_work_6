@@ -1,11 +1,18 @@
 {% load static %}
+{% load my_user_tags %}
 <link href="{% static '/css/breadcrumbs.css' %}" rel="stylesheet">
 <div class="container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-custom overflow-hidden text-center bg-body-tertiary border rounded-2">
+            {% if request.user|manager %}
+            <li class="breadcrumb-item">
+                <a class="link-body-emphasis text-decoration-none" href="{% url 'newsletters:manager_user_list' %}">Users</a>
+            </li>
+            {% else %}
             <li class="breadcrumb-item">
                 <a class="link-body-emphasis text-decoration-none" href="{% url 'newsletters:home' %}">Home</a>
             </li>
+            {% endif %}
             <li class="breadcrumb-item">
                 <a class="link-body-emphasis text-decoration-none" href="{% url 'newsletters:newsletter_list' %}">Newsletters</a>
             </li>

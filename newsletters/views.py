@@ -1,4 +1,6 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from itertools import product
+
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DetailView, ListView, DeleteView, TemplateView
@@ -10,7 +12,51 @@ from newsletters.services import send_newsletter
 from users.models import User
 
 
-class HomeListView(LoginRequiredMixin, TemplateView):
+class CheckSimpleUser(UserPassesTestMixin):
+    """
+    Миксин проверяет: не является ли пользователь менеджером или суперпользователем
+    """
+    def test_func(self):
+        return not self.request.user.is_superuser and not self.request.user.groups.filter(name='manager').exists()
+
+
+class CheckManager(UserPassesTestMixin):
+    """
+    Миксин проверяет: является ли пользователь менеджером
+    """
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='manager').exists()
+
+class CheckOwnerNewsletter(PermissionRequiredMixin):
+    """
+    Миксин проверяет что текущий пользователь является владельцем рассылки
+    Или у пользователя есть права просматривать чужие рассылки
+    """
+    permission_required = 'newsletters.view_owner_newsletter'
+
+    def has_permission(self):
+        newsletter = get_object_or_404(Newsletter, pk=self.kwargs.get('pk'))
+        return super().has_permission() or newsletter.user == self.request.user
+
+
+class ManagerUserListView(ListView):
+    model = User
+    context_object_name = 'users'
+    template_name = 'newsletters/manager_user_list.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        data['users'] = [
+            {
+                'user': item,
+                'newsletters': Newsletter.objects.filter(user=item),
+                'clients': Client.objects.filter(user=item)
+            }
+            for item in data['users']
+        ]
+        return data
+
+class HomeListView(CheckSimpleUser, TemplateView):
     """
     Главная страница
     """
@@ -26,7 +72,7 @@ class HomeListView(LoginRequiredMixin, TemplateView):
         data['clients'] = clients
         active_newsletters = newsletters.filter(status='active')
         data['active_newsletters'] = active_newsletters
-        posts = Blog.objects.all().order_by('-views_count')[:3]
+        posts = Blog.objects.filter(is_active=True).order_by('-views_count')[:3]
         data['posts'] = posts
         return data
 
@@ -40,11 +86,14 @@ class NewsletterListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        data = Newsletter.objects.filter(user=user).order_by('-created_at')
+        if user.is_superuser or user.groups.filter(name='manager').exists():
+            data = Newsletter.objects.all().order_by('-created_at')
+        else:
+            data = Newsletter.objects.filter(user=user).order_by('-created_at')
         return data
 
 
-class NewsletterDetailView(LoginRequiredMixin, DetailView):
+class NewsletterDetailView(CheckOwnerNewsletter, DetailView):
     """
     Отображение информации о рассылке
     """
@@ -117,7 +166,10 @@ class MessageListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        data = Message.objects.filter(user=user).order_by('title')
+        if user.is_superuser or user.groups.filter(name='manager').exists():
+            data = Message.objects.all().order_by('title')
+        else:
+            data = Message.objects.filter(user=user).order_by('title')
         return data
 
 
@@ -163,7 +215,10 @@ class ClientListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        data = Client.objects.filter(user=user).order_by('-created_at')
+        if user.is_superuser or user.groups.filter(name='manager').exists():
+            data = Client.objects.all().order_by('-created_at')
+        else:
+            data = Client.objects.filter(user=user).order_by('-created_at')
         if self.request.GET.get('newsletter'):
             newsletter = get_object_or_404(Newsletter, pk=self.request.GET.get('newsletter'))
             data = newsletter.clients.all()

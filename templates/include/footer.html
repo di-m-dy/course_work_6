@@ -1,7 +1,12 @@
+{% load my_user_tags %}
 <div class="container">
   <footer class="py-3 my-4">
     <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+      {% if request.user|manager %}
+      <li class="nav-item"><a href="{% url 'newsletters:home' %}" class="nav-link px-2 text-body-secondary">Users</a></li>
+      {% else %}
       <li class="nav-item"><a href="{% url 'newsletters:home' %}" class="nav-link px-2 text-body-secondary">Home</a></li>
+      {% endif %}
       <li class="nav-item"><a href="{% url 'newsletters:newsletter_list' %}" class="nav-link px-2 text-body-secondary">Newsletters</a></li>
       <li class="nav-item"><a href="{% url 'newsletters:message_list' %}" class="nav-link px-2 text-body-secondary">Messages</a></li>
       <li class="nav-item"><a href="{% url 'newsletters:client_list' %}" class="nav-link px-2 text-body-secondary">Clients</a></li>

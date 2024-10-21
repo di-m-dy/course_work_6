@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load my_tags %}
+{% load my_user_tags %}
 {% block title %}Blog{% endblock %}
 {% block content %}
 {% include 'include/title.html' with title="Блог нашего сервиса" body="Интересные статьи и новости из мира web технологий, а также полезные туториалы" %}
-{% if perms.is_superuser or request.user|has_group:"blog_content_manager" %}
+{% if request.user|manager %}
 <div class="p-2 col-12 my-2">
     <a class="btn btn-outline-secondary" href="{% url 'blog:create_post' %}">Новый пост</a>
 </div>
 {% endif %}
 {% for post in page_obj %}
-{% if post.is_active or perms.is_superuser or request.user|has_group:"blog_content_manager" %}
+{% if post.is_active or request.user|manager %}
 <div class="p-2 rounded col-12 my-2">
     <div class="card">
-        {% if perms.is_superuser or request.user|has_group:"blog_content_manager" %}
+        {% if request.user|manager %}
         {% if post.is_active %}
         <div class="card-header">
             <small>Опубликованно</small>

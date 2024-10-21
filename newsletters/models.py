@@ -78,6 +78,11 @@ class Newsletter(models.Model):
         verbose_name = 'рассылка'
         verbose_name_plural = 'рассылки'
 
+        permissions = [
+            ('view_owner_newsletter', 'Can view others owner newsletters'),
+            ('set_closed_newsletter', 'Can set closed newsletters'),
+        ]
+
 
 class NewsletterReport(models.Model):
     """

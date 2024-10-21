@@ -11,7 +11,7 @@ from django.views.generic import ListView, CreateView, DetailView, DeleteView, U
 
 class BlogListView(LoginRequiredMixin, ListView):
     model = Blog
-    paginate_by = 2
+    paginate_by = 10
 
     def get_queryset(self):
         data = super().get_queryset().order_by('-created_at')

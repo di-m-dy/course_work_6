@@ -15,12 +15,14 @@ from newsletters.views import (NewsletterListView,
                                NewsletterReportListView,
                                start_sending,
                                stop_sending,
-                               HomeListView)
+                               HomeListView,
+                               ManagerUserListView)
 
 app_name = 'newsletters'
 
 urlpatterns = [
     path('', HomeListView.as_view(), name='home'),
+    path('manager/users', ManagerUserListView.as_view(), name='manager_user_list'),
     path('newsletters', NewsletterListView.as_view(), name='newsletter_list'),
     path('newsletters/<int:pk>', NewsletterDetailView.as_view(), name='newsletter_detail'),
     path('newsletters/<int:newsletter_id>/report', NewsletterReportListView.as_view(), name='newsletter_report'),
