@@ -16,7 +16,7 @@ from newsletters.views import (NewsletterListView,
                                start_sending,
                                stop_sending,
                                HomeListView,
-                               ManagerUserListView)
+                               ManagerUserListView, DatetimeLateTemplateView)
 
 app_name = 'newsletters'
 
@@ -31,6 +31,7 @@ urlpatterns = [
     path('newsletters/add', NewsletterCreateView.as_view(), name='add_newsletter'),
     path('newsletters/update/<int:pk>', NewsletterUpdateView.as_view(), name='update_newsletter'),
     path('newsletters/delete/<int:pk>', NewsletterDeleteView.as_view(), name='delete_newsletter'),
+    path('newsletters/<int:newsletter_id>/datetime_late', DatetimeLateTemplateView.as_view(), name='datetime_late'),
     path('messages', MessageListView.as_view(), name='message_list'),
     path('messages/<int:pk>', MessageDetailView.as_view(), name='message_detail'),
     path('messages/add', MessageCreateView.as_view(), name='add_message'),

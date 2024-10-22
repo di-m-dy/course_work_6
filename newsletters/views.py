@@ -3,9 +3,11 @@ from itertools import product
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
+from django.utils.datetime_safe import datetime
 from django.views.generic import CreateView, UpdateView, DetailView, ListView, DeleteView, TemplateView
 
 from blog.models import Blog
+from config.settings import ZONE
 from newsletters.forms import NewsletterForm, MessageForm, ClientForm
 from newsletters.models import Newsletter, Message, Client, NewsletterReport
 from newsletters.services import send_newsletter
@@ -20,7 +22,41 @@ class CheckManager(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.groups.filter(name='manager').exists()
 
-class CheckOwnerNewsletter(PermissionRequiredMixin):
+class CheckSimpleUserCreate(UserPassesTestMixin):
+    """
+    Миксин проверяет: является ли пользователь простым пользователем
+    """
+    def test_func(self):
+        check_is_not_manager = (not self.request.user.is_superuser and
+                            not self.request.user.groups.filter(name='manager').exists())
+
+        return check_is_not_manager
+
+class CheckOwnerUpdateNewsletter(UserPassesTestMixin):
+    """
+    Миксин проверяет: является ли пользователь простым пользователем
+    """
+    def test_func(self):
+        newsletter = get_object_or_404(Newsletter, pk=self.kwargs.get('pk'))
+        return newsletter.user == self.request.user
+
+class CheckOwnerUpdateMessage(UserPassesTestMixin):
+    """
+    Миксин проверяет: является ли пользователь простым пользователем
+    """
+    def test_func(self):
+        message = get_object_or_404(Message, pk=self.kwargs.get('pk'))
+        return message.user == self.request.user
+
+class CheckOwnerUpdateClient(UserPassesTestMixin):
+    """
+    Миксин проверяет: является ли пользователь простым пользователем
+    """
+    def test_func(self):
+        client = get_object_or_404(Client, pk=self.kwargs.get('pk'))
+        return client.user == self.request.user
+
+class CheckOwnerViewNewsletter(PermissionRequiredMixin):
     """
     Миксин проверяет что текущий пользователь является владельцем рассылки
     Или у пользователя есть права просматривать чужие рассылки
@@ -32,10 +68,14 @@ class CheckOwnerNewsletter(PermissionRequiredMixin):
         return super().has_permission() or newsletter.user == self.request.user
 
 
-class ManagerUserListView(ListView):
+class ManagerUserListView(CheckManager, ListView):
     model = User
     context_object_name = 'users'
     template_name = 'newsletters/manager_user_list.html'
+
+    def get_queryset(self):
+        data = [user for user in User.objects.all() if not user.is_superuser and not user.groups.filter(name='manager').exists()]
+        return data
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data()
@@ -86,12 +126,15 @@ class NewsletterListView(LoginRequiredMixin, ListView):
         user = self.request.user
         if user.is_superuser or user.groups.filter(name='manager').exists():
             data = Newsletter.objects.all().order_by('-created_at')
+            if self.request.GET.get('user'):
+                user = get_object_or_404(User, pk=self.request.GET.get('user'))
+                data = data.filter(user=user).order_by('-created_at')
         else:
             data = Newsletter.objects.filter(user=user).order_by('-created_at')
         return data
 
 
-class NewsletterDetailView(CheckOwnerNewsletter, DetailView):
+class NewsletterDetailView(CheckOwnerViewNewsletter, DetailView):
     """
     Отображение информации о рассылке
     """
@@ -110,7 +153,7 @@ class NewsletterDetailView(CheckOwnerNewsletter, DetailView):
         return data
 
 
-class NewsletterCreateView(CreateView):
+class NewsletterCreateView(CheckSimpleUserCreate, CreateView):
     model = Newsletter
     form_class = NewsletterForm
     success_url = reverse_lazy('newsletters:newsletter_list')
@@ -132,7 +175,7 @@ class NewsletterCreateView(CreateView):
         return super().form_valid(form)
 
 
-class NewsletterUpdateView(UpdateView):
+class NewsletterUpdateView(CheckOwnerUpdateNewsletter, UpdateView):
     model = Newsletter
     form_class = NewsletterForm
     success_url = reverse_lazy('newsletters:newsletter_list')
@@ -154,8 +197,9 @@ class NewsletterUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class NewsletterDeleteView(DeleteView):
+class NewsletterDeleteView(CheckOwnerUpdateNewsletter, DeleteView):
     model = Newsletter
+    success_url = reverse_lazy('newsletters:newsletter_list')
 
 
 class MessageListView(LoginRequiredMixin, ListView):
@@ -166,6 +210,9 @@ class MessageListView(LoginRequiredMixin, ListView):
         user = self.request.user
         if user.is_superuser or user.groups.filter(name='manager').exists():
             data = Message.objects.all().order_by('title')
+            if self.request.GET.get('user'):
+                user = get_object_or_404(User, pk=self.request.GET.get('user'))
+                data = data.filter(user=user).order_by('title')
         else:
             data = Message.objects.filter(user=user).order_by('title')
         return data
@@ -175,7 +222,7 @@ class MessageDetailView(DetailView):
     model = Message
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(CheckSimpleUserCreate, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('newsletters:message_list')
@@ -189,7 +236,7 @@ class MessageCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(CheckOwnerUpdateMessage, UpdateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('newsletters:message_list')
@@ -203,7 +250,7 @@ class MessageUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(CheckOwnerUpdateMessage, DeleteView):
     model = Message
 
 
@@ -215,6 +262,9 @@ class ClientListView(LoginRequiredMixin, ListView):
         user = self.request.user
         if user.is_superuser or user.groups.filter(name='manager').exists():
             data = Client.objects.all().order_by('-created_at')
+            if self.request.GET.get('user'):
+                user = get_object_or_404(User, pk=self.request.GET.get('user'))
+                data = data.filter(user=user).order_by('-created_at')
         else:
             data = Client.objects.filter(user=user).order_by('-created_at')
         if self.request.GET.get('newsletter'):
@@ -229,7 +279,7 @@ class ClientListView(LoginRequiredMixin, ListView):
         return data
 
 
-class ClientCreateView(LoginRequiredMixin, CreateView):
+class ClientCreateView(LoginRequiredMixin, CheckSimpleUserCreate, CreateView):
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('newsletters:client_list')
@@ -243,7 +293,7 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClientUpdateView(LoginRequiredMixin, UpdateView):
+class ClientUpdateView(LoginRequiredMixin, CheckOwnerUpdateClient, UpdateView):
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('newsletters:client_list')
@@ -277,8 +327,8 @@ class NewsletterReportListView(LoginRequiredMixin, ListView):
 
 def start_sending(request, newsletter_id):
     newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
-    if newsletter.status == 'closed':
-        send_newsletter(newsletter)
+    if newsletter.status == 'created' and newsletter.date_time < datetime.now(ZONE):
+        return redirect(reverse('newsletters:datetime_late', args=[newsletter_id]))
     newsletter.status = 'active'
     newsletter.save()
     return redirect(reverse('newsletters:newsletter_detail', args=[newsletter_id]))
@@ -288,9 +338,12 @@ def stop_sending(request, newsletter_id):
     newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
     newsletter.status = 'closed'
     newsletter.save()
-    NewsletterReport.objects.create(
-        newsletter=newsletter,
-        is_success=False,
-        report='Рассылка остановлена'
-    )
     return redirect(reverse('newsletters:newsletter_detail', args=[newsletter_id]))
+
+class DatetimeLateTemplateView(TemplateView):
+    template_name = 'newsletters/datetime_late.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data()
+        data['newsletter_id'] = self.kwargs.get('newsletter_id')
+        return data

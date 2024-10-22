@@ -6,9 +6,9 @@
     {% if request.user|manager %}
     <div class="card-header">
         {% if object.is_status %}
-        <p class="text-success">Статус: опубликованный</p>
+        <p class="text-secondary"><small>Статус: опубликованный</small></p>
         {% else %}
-        <p class="text-danger">Статус: неопубликованный</p>
+        <p class="text-secondary"><small>Статус: неопубликованный</small></p>
         {% endif %}
         <p>
             <a href="{% url 'blog:update_post' object.id %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>

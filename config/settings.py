@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import dotenv
+import pytz
 from django.utils import timezone
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -118,6 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'RU-ru'
 
 TIME_ZONE = 'Europe/Belgrade'
+ZONE = pytz.timezone(TIME_ZONE)
 
 USE_I18N = True
 

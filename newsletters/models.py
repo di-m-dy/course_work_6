@@ -92,6 +92,11 @@ class NewsletterReport(models.Model):
     date_time = models.DateTimeField(auto_now=True, verbose_name='Дата и время попытки рассылки')
     is_success = models.BooleanField(verbose_name='Попытка успешная')
     report = models.CharField(max_length=255, verbose_name='Отчет в случае ошибки попытки', null=True, blank=True)
+    next_send = models.DateTimeField(
+        verbose_name='Дата и время следующей попытки рассылки',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return f"Попытка #{self.pk}: {self.date_time} (рассылка # {self.newsletter.pk}"

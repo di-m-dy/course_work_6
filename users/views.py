@@ -8,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from config.settings import EMAIL_HOST_USER
 from users.forms import UserRegisterForm, ProfileForm, LoginForm
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, TemplateView, RedirectView
 from django.contrib.auth.views import LoginView
 from users.models import User
 
@@ -86,3 +86,22 @@ def reset_password(request):
 
 def logout_confirm(request):
     return render(request, 'users/logout_confirm.html')
+
+
+class DeactivateUser(RedirectView):
+    pattern_name = 'newsletters:manager_user_list'
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, pk=self.kwargs.get('user_id'))
+        user.is_active = False
+        user.save()
+        return super().get(request, *args)
+
+class ActivateUser(RedirectView):
+    pattern_name = 'newsletters:manager_user_list'
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, pk=self.kwargs.get('user_id'))
+        user.is_active = True
+        user.save()
+        return super().get(request, *args)

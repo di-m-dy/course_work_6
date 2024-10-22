@@ -1,7 +1,14 @@
 from django.contrib.auth.views import LogoutView, LoginView
 from django.urls import path
 
-from users.views import RegisterCreateView, email_verification, reset_password, ProfileUpdateView, Login, logout_confirm
+from users.views import (
+    RegisterCreateView,
+    email_verification,
+    reset_password,
+    ProfileUpdateView,
+    Login,
+    logout_confirm, DeactivateUser, ActivateUser, )
+
 
 app_name = 'users'
 
@@ -12,5 +19,7 @@ urlpatterns = [
     path('register', RegisterCreateView.as_view(), name='register'),
     path('check_email/<str:token>', email_verification, name='email_verification'),
     path('reset_password', reset_password, name='reset_password'),
-    path('profile', ProfileUpdateView.as_view(), name='profile')
+    path('profile', ProfileUpdateView.as_view(), name='profile'),
+    path('user/<int:user_id>/activate', ActivateUser.as_view(), name='user_activate'),
+    path('user/<int:user_id>/deactivate', DeactivateUser.as_view(), name='user_deactivate'),
 ]

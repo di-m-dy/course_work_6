@@ -1,3 +1,8 @@
+from datetime import datetime
+
+from django.core.exceptions import ValidationError
+
+from config.settings import ZONE
 from django import forms
 from newsletters.models import Newsletter, Client, Message
 
@@ -15,8 +20,7 @@ class NewsletterForm(FormControlMixin, forms.ModelForm):
     date_time = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={
             'type': 'datetime-local',
-            'class': 'form-control',
-            'placeholder': 'Select a date and time'
+            'class': 'form-control'
         }),
         label='Время первой рассылки',
         required=True
@@ -30,6 +34,13 @@ class NewsletterForm(FormControlMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['clients'].queryset = Client.objects.filter(user=user)
+
+    def clean(self):
+        data = super().clean()
+        date_time = data.get('date_time')
+        if date_time < datetime.now(ZONE):
+            raise ValidationError("Дата должна быть позже текущего времени")
+        return data
 
 
 class MessageForm(FormControlMixin, forms.ModelForm):

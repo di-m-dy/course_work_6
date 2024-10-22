@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+{% load my_user_tags %}
 {% block title %}Newsletter#{{ newsletter.pk }}{% endblock %}
 {% block content %}
 <div class="shadow rounded-3 m-4">
     <div class="p-4 my-2 bg-body-tertiary rounded-3">
         <h3>Рассылка #{{ newsletter.pk }}</h3>
         <p><small class="text-secondary">{{ newsletter.created_at }}</small></p>
+        {% if not request.user|manager %}
         <div>
             <a href="{% url 'newsletters:update_newsletter' newsletter.pk %}" class="btn btn-outline-secondary">Редактировать</a>
             <a href="{% url 'newsletters:delete_newsletter' newsletter.pk %}" class="btn btn-outline-secondary">Удалить</a>
         </div>
+        {% endif %}
     </div>
     <div class="list-group list-group-flush container p-2 my-2">
         <a class="list-group-item list-group-item-action"aria-current="true">

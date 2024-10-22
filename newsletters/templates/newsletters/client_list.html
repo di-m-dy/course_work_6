@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load my_user_tags %}
 {% load static %}
 {% block title %}Newsletters{% endblock %}
 {% block content %}
@@ -7,9 +8,11 @@
 {% else %}
 {% include 'include/title.html' with title="Ваши Клиенты" body="На это странице вы найдете свою клиентскую базу." %}
 {% endif %}
+{% if not request.user|manager %}
 <div>
     <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_client' %}">Новый клиент</a>
 </div>
+{% endif %}
 <div class="p-1 rounded col-12 my-2">
     <div class="card py-2 px-1 overflow-auto">
         <table class="table table-striped">
@@ -22,7 +25,11 @@
                 <th scope="col">email</th>
                 <th scope="col">Комментарий</th>
                 <th scope="col">created_at</th>
+                {% if not request.user|manager %}
                 <th scope="col">edit</th>
+                {% else %}
+                <th scope="col">User</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody class="table-group-divider">
@@ -39,9 +46,15 @@
                 <td>-</td>
                 {% endif %}
                 <td>{{ client.created_at }}</td>
+                {% if not request.user|manager %}
                 <td>
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'newsletters:update_client' client.pk %}">edit</a>
                 </td>
+                {% else %}
+                <td>
+                    {{ client.user }}
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
             </tbody>
