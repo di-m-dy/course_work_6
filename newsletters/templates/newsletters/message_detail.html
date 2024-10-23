@@ -10,6 +10,10 @@
             <a href="{% url 'newsletters:update_message' message.pk %}" class="btn btn-outline-secondary">Редактировать</a>
             <a href="{% url 'newsletters:delete_message' message.pk %}" class="btn btn-outline-secondary">Удалить</a>
         </div>
+        {% else %}
+        <p class="text-secondary">
+            <small>Пользователь: {{ message.user }}</small>
+        </p>
         {% endif %}
     </div>
     <div class="container p-4 my-2">

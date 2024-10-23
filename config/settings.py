@@ -169,3 +169,6 @@ CACHES = {
         "LOCATION": os.getenv('CACHES_LOCATION'),
     }
 }
+
+# for run scheduler when app is started
+AUTORUN_SCHEDULER = True

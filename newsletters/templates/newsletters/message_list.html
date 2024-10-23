@@ -3,11 +3,13 @@
 {% load static %}
 {% block title %}Messages{% endblock %}
 {% block content %}
-{% include 'include/title.html' with title="Ваши Сообщения" body="На это странице вы найдете список всех своих сообщений для рассылок." %}
 {% if not request.user|manager %}
+{% include 'include/title.html' with title="Ваши Сообщения" body="На это странице вы найдете список всех своих сообщений для рассылок." %}
 <div>
     <a class="btn btn-outline-primary p-2 m-2" href="{% url 'newsletters:add_message' %}">Новое сообщение</a>
 </div>
+{% else %}
+{% include 'include/title.html' with title="Все Сообщения" body="На это странице вы найдете список всех сообщений для рассылок." %}
 {% endif %}
 {% for message in page_obj %}
 <div class="p-2 rounded col-12 my-2">

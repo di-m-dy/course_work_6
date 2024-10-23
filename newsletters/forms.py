@@ -32,10 +32,16 @@ class NewsletterForm(FormControlMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        # фильтрация только своих объектов
         if user:
             self.fields['clients'].queryset = Client.objects.filter(user=user)
+            self.fields['message'].queryset = Message.objects.filter(user=user)
 
     def clean(self):
+        """
+        Проверка времени отправки
+        Не должно быть просроченной
+        """
         data = super().clean()
         date_time = data.get('date_time')
         if date_time < datetime.now(ZONE):

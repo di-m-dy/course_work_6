@@ -1,6 +1,8 @@
 import os
+from time import sleep
+
 from django.apps import AppConfig
-from django.conf import settings
+from config.settings import AUTORUN_SCHEDULER, DEBUG
 
 
 class NewslettersConfig(AppConfig):
@@ -9,10 +11,7 @@ class NewslettersConfig(AppConfig):
 
 
     def ready(self):
-        if settings.DEBUG and os.environ.get('RUN_MAIN') == 'true':
+        if DEBUG and os.environ.get('RUN_MAIN') and AUTORUN_SCHEDULER:
             from newsletters.task import scheduler
-            scheduler.start()
-
-
-
-
+            sleep(2)
+            scheduler.start() # автоматический запуск периодической задачи (отправка рассылок) при запуске приложения

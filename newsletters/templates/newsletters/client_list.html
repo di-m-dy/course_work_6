@@ -6,7 +6,11 @@
 {% if get_newsletter %}
 {% include 'include/title.html' with title="Клиенты Рассылки" body=get_newsletter %}
 {% else %}
+{% if not request.user|manager %}
 {% include 'include/title.html' with title="Ваши Клиенты" body="На это странице вы найдете свою клиентскую базу." %}
+{% else %}
+{% include 'include/title.html' with title="Все Клиенты" body="На это странице вы найдете всю клиентскую базу." %}
+{% endif %}
 {% endif %}
 {% if not request.user|manager %}
 <div>
@@ -27,6 +31,7 @@
                 <th scope="col">created_at</th>
                 {% if not request.user|manager %}
                 <th scope="col">edit</th>
+                <th scope="col">delete</th>
                 {% else %}
                 <th scope="col">User</th>
                 {% endif %}
@@ -49,6 +54,9 @@
                 {% if not request.user|manager %}
                 <td>
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'newsletters:update_client' client.pk %}">edit</a>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'newsletters:delete_client' client.pk %}">delete</a>
                 </td>
                 {% else %}
                 <td>

@@ -5,6 +5,9 @@ from users.models import User
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        """
+        Команда для создания менеджера
+        """
         permission_code_names = (
             'view_owner_newsletter',
             'view_list_user',

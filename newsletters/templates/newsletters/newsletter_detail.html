@@ -14,13 +14,18 @@
         {% endif %}
     </div>
     <div class="list-group list-group-flush container p-2 my-2">
-        <a class="list-group-item list-group-item-action"aria-current="true">
+        {% if request.user|manager %}
+        <a class="list-group-item list-group-item-action" aria-current="true">
+            <b>Пользователь:</b> {{ newsletter.user }}
+        </a>
+        {% endif %}
+        <a class="list-group-item list-group-item-action" aria-current="true">
             <b>Статус:</b> {{ newsletter.get_status_display }}
         </a>
-        <a class="list-group-item list-group-item-action"aria-current="true">
+        <a class="list-group-item list-group-item-action" aria-current="true">
             <b>Периодичность:</b> {{ newsletter.get_period_display }}
         </a>
-        <a class="list-group-item list-group-item-action"aria-current="true">
+        <a class="list-group-item list-group-item-action" aria-current="true">
             <b>Дата первой рассылки:</b> {{ newsletter.date_time }}
         </a>
         <a class="list-group-item list-group-item-action"

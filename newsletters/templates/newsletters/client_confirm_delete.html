@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Delete Client{% endblock %}
+{% block content %}
+{% include 'include/title.html' with title='Удаление Клиента!' body='Вы точно хотите удалить клиента?' %}
+<div class="my-2">
+    <div class="card border mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Клиент #{{ object.pk }}</h5>
+            <p class="card-text">{{ object }}</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-outline-danger w-100 mt-4 mb-2">Удалить</button>
+                    </div>
+                    <div class="col-6">
+                        <a class="btn btn-secondary w-100 mt-4 mb-2" href="{% url 'newsletters:client_list' %}">Отмена</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

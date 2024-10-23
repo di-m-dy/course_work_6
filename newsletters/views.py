@@ -1,16 +1,12 @@
-from itertools import product
-
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.datetime_safe import datetime
 from django.views.generic import CreateView, UpdateView, DetailView, ListView, DeleteView, TemplateView
-
 from blog.models import Blog
 from config.settings import ZONE
 from newsletters.forms import NewsletterForm, MessageForm, ClientForm
 from newsletters.models import Newsletter, Message, Client, NewsletterReport
-from newsletters.services import send_newsletter
 from users.models import User
 
 
@@ -69,6 +65,9 @@ class CheckOwnerViewNewsletter(PermissionRequiredMixin):
 
 
 class ManagerUserListView(CheckManager, ListView):
+    """
+    Отображение списка всех пользователей для менеджера
+    """
     model = User
     context_object_name = 'users'
     template_name = 'newsletters/manager_user_list.html'
@@ -154,6 +153,9 @@ class NewsletterDetailView(CheckOwnerViewNewsletter, DetailView):
 
 
 class NewsletterCreateView(CheckSimpleUserCreate, CreateView):
+    """
+    Создание рассылок
+    """
     model = Newsletter
     form_class = NewsletterForm
     success_url = reverse_lazy('newsletters:newsletter_list')
@@ -176,6 +178,9 @@ class NewsletterCreateView(CheckSimpleUserCreate, CreateView):
 
 
 class NewsletterUpdateView(CheckOwnerUpdateNewsletter, UpdateView):
+    """
+    Редактирование рассылок.
+    """
     model = Newsletter
     form_class = NewsletterForm
     success_url = reverse_lazy('newsletters:newsletter_list')
@@ -198,11 +203,17 @@ class NewsletterUpdateView(CheckOwnerUpdateNewsletter, UpdateView):
 
 
 class NewsletterDeleteView(CheckOwnerUpdateNewsletter, DeleteView):
+    """
+    Удаление рассылок.
+    """
     model = Newsletter
     success_url = reverse_lazy('newsletters:newsletter_list')
 
 
 class MessageListView(LoginRequiredMixin, ListView):
+    """
+    Отображение списка сообщений
+    """
     model = Message
     paginate_by = 10
 
@@ -219,10 +230,16 @@ class MessageListView(LoginRequiredMixin, ListView):
 
 
 class MessageDetailView(DetailView):
+    """
+    Отображение сообщения
+    """
     model = Message
 
 
 class MessageCreateView(CheckSimpleUserCreate, CreateView):
+    """
+    Создание сообщения
+    """
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('newsletters:message_list')
@@ -237,6 +254,9 @@ class MessageCreateView(CheckSimpleUserCreate, CreateView):
 
 
 class MessageUpdateView(CheckOwnerUpdateMessage, UpdateView):
+    """
+    Редактирование сообщения
+    """
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('newsletters:message_list')
@@ -251,10 +271,17 @@ class MessageUpdateView(CheckOwnerUpdateMessage, UpdateView):
 
 
 class MessageDeleteView(CheckOwnerUpdateMessage, DeleteView):
+    """
+    Удаление сообщения
+    """
     model = Message
+    success_url = reverse_lazy('newsletters:message_list')
 
 
 class ClientListView(LoginRequiredMixin, ListView):
+    """
+    Отображение списка клиентов
+    """
     model = Client
     paginate_by = 30
 
@@ -280,6 +307,9 @@ class ClientListView(LoginRequiredMixin, ListView):
 
 
 class ClientCreateView(LoginRequiredMixin, CheckSimpleUserCreate, CreateView):
+    """
+    Добавление клиента
+    """
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('newsletters:client_list')
@@ -294,6 +324,9 @@ class ClientCreateView(LoginRequiredMixin, CheckSimpleUserCreate, CreateView):
 
 
 class ClientUpdateView(LoginRequiredMixin, CheckOwnerUpdateClient, UpdateView):
+    """
+    Редактирование клиента
+    """
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('newsletters:client_list')
@@ -307,7 +340,18 @@ class ClientUpdateView(LoginRequiredMixin, CheckOwnerUpdateClient, UpdateView):
         return super().form_valid(form)
 
 
+class ClientDeleteView(CheckOwnerUpdateClient, DeleteView):
+    """
+    Удаление клиента
+    """
+    model = Client
+    success_url = reverse_lazy('newsletters:client_list')
+
+
 class NewsletterReportListView(LoginRequiredMixin, ListView):
+    """
+    Отображение списка отчетов рассылки
+    """
     model = NewsletterReport
     paginate_by = 30
 
@@ -326,6 +370,9 @@ class NewsletterReportListView(LoginRequiredMixin, ListView):
 
 
 def start_sending(request, newsletter_id):
+    """
+    Запуск рассылки
+    """
     newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
     if newsletter.status == 'created' and newsletter.date_time < datetime.now(ZONE):
         return redirect(reverse('newsletters:datetime_late', args=[newsletter_id]))
@@ -335,12 +382,18 @@ def start_sending(request, newsletter_id):
 
 
 def stop_sending(request, newsletter_id):
+    """
+    Остановка рассылки
+    """
     newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
     newsletter.status = 'closed'
     newsletter.save()
     return redirect(reverse('newsletters:newsletter_detail', args=[newsletter_id]))
 
 class DatetimeLateTemplateView(TemplateView):
+    """
+    Предупреждение о том что дата первой отправки рассылки - просрочена
+    """
     template_name = 'newsletters/datetime_late.html'
 
     def get_context_data(self, **kwargs):

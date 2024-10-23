@@ -14,6 +14,9 @@ from users.models import User
 
 
 class RegisterCreateView(CreateView):
+    """
+    Регистрация пользователя
+    """
     model = User
     form_class = UserRegisterForm
     template_name = 'users/register.html'
@@ -37,6 +40,9 @@ class RegisterCreateView(CreateView):
 
 
 class ProfileUpdateView(UpdateView):
+    """
+    Редактирование пользователя
+    """
     model = User
     context_object_name = 'user'
     success_url = reverse_lazy('users:profile')
@@ -48,11 +54,17 @@ class ProfileUpdateView(UpdateView):
 
 
 class Login(LoginView):
+    """
+    Логин пользователя
+    """
     form_class = LoginForm
     template_name = 'users/login.html'
 
 
 def email_verification(request, token):
+    """
+    Верификация по почте
+    """
     user = get_object_or_404(User, token=token)
     user.is_active = True
     user.save()
@@ -60,6 +72,9 @@ def email_verification(request, token):
 
 
 def reset_password(request):
+    """
+    Сброс пароля
+    """
     if request.method == 'POST':
         email = request.POST.get('email')
 
@@ -89,6 +104,9 @@ def logout_confirm(request):
 
 
 class DeactivateUser(RedirectView):
+    """
+    Для менеджера - банить пользователя
+    """
     pattern_name = 'newsletters:manager_user_list'
 
     def get(self, request, *args, **kwargs):
@@ -98,6 +116,9 @@ class DeactivateUser(RedirectView):
         return super().get(request, *args)
 
 class ActivateUser(RedirectView):
+    """
+    Для менеджера - разбанить пользователя
+    """
     pattern_name = 'newsletters:manager_user_list'
 
     def get(self, request, *args, **kwargs):

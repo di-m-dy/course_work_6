@@ -1,24 +1,26 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
-from pytils.templatetags.pytils_translit import slugify
 from blog.forms import BlogForm
 from blog.models import Blog
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 
 
-# Create your views here.
-
 
 class BlogListView(LoginRequiredMixin, ListView):
+    """
+    Отображение списка постов
+    """
     model = Blog
     paginate_by = 10
 
     def get_queryset(self):
+        # сортировка по дате создания
         data = super().get_queryset().order_by('-created_at')
         return data
 
     def get_context_data(self, *, object_list=None, **kwargs):
         data = super().get_context_data()
+        # обработка параметра - показывать неопубликованные
         hidden = self.request.GET.get('hidden')
         if hidden:
             data['hidden'] = True
@@ -26,32 +28,33 @@ class BlogListView(LoginRequiredMixin, ListView):
 
 
 class BlogDetailView(LoginRequiredMixin, DetailView):
+    """
+    Отображение поста
+    """
     model = Blog
 
     def get_object(self, queryset=None):
         self.object = super().get_object(queryset)
-        self.object.views_count += 1
+        self.object.views_count += 1 # счетчик просмотров
         self.object.save()
         return self.object
 
 
 class BlogCreateView(LoginRequiredMixin, CreateView):
+    """
+    Создание поста
+    """
     model = Blog
-    success_url = reverse_lazy('blog:index')
+    success_url = reverse_lazy('blog:blog')
     form_class = BlogForm
 
-    def form_valid(self, form):
-        if form.is_valid():
-            new_blog = form.save()
-            new_blog.slug = slugify(new_blog.title)
-            new_blog.save()
-
-        return super().form_valid(form)
 
 
 class BlogUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Редактирование поста
+    """
     model = Blog
-    success_url = reverse_lazy('blog:index')
     form_class = BlogForm
 
     def get_success_url(self):
@@ -59,6 +62,8 @@ class BlogUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class BlogDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Удаление поста
+    """
     model = Blog
-    success_url = reverse_lazy('blog:index')
-
+    success_url = reverse_lazy('blog:blog')

@@ -1,4 +1,5 @@
 from django.urls import path
+from newsletters.services import set_cache_controller
 from newsletters.views import (NewsletterListView,
                                MessageListView,
                                NewsletterDetailView,
@@ -16,12 +17,14 @@ from newsletters.views import (NewsletterListView,
                                start_sending,
                                stop_sending,
                                HomeListView,
-                               ManagerUserListView, DatetimeLateTemplateView)
+                               ManagerUserListView,
+                               DatetimeLateTemplateView,
+                               ClientDeleteView)
 
 app_name = 'newsletters'
 
 urlpatterns = [
-    path('', HomeListView.as_view(), name='home'),
+    path('', set_cache_controller(HomeListView.as_view()), name='home'),
     path('manager/users', ManagerUserListView.as_view(), name='manager_user_list'),
     path('newsletters', NewsletterListView.as_view(), name='newsletter_list'),
     path('newsletters/<int:pk>', NewsletterDetailView.as_view(), name='newsletter_detail'),
@@ -39,5 +42,6 @@ urlpatterns = [
     path('messages/delete/<int:pk>', MessageDeleteView.as_view(), name='delete_message'),
     path('clients', ClientListView.as_view(), name='client_list'),
     path('clients/add', ClientCreateView.as_view(), name='add_client'),
-    path('clients/update/<int:pk>', ClientUpdateView.as_view(), name='update_client')
+    path('clients/update/<int:pk>', ClientUpdateView.as_view(), name='update_client'),
+    path('clients/delete/<int:pk>', ClientDeleteView.as_view(), name='delete_client')
 ]

@@ -3,10 +3,12 @@ from datetime import timedelta
 
 from django.core.mail import send_mail
 from django.utils.datetime_safe import datetime
+from django.views.decorators.cache import cache_page
 
-from config.settings import EMAIL_HOST_USER, ZONE
+from config.settings import EMAIL_HOST_USER, ZONE, CACHED_ENABLED
 from newsletters.models import Newsletter, NewsletterReport
 
+# интервалы рассылок для разных периодов
 PERIOD_DELTA = {
         'days': timedelta(hours=24),
         'weeks': timedelta(days=7),
@@ -14,8 +16,11 @@ PERIOD_DELTA = {
     }
 
 
-def send_newsletter(newsletter: Newsletter):
-
+def send_newsletter(newsletter: Newsletter, no_report=False):
+    """
+    Отправка рассылок
+    no_report: не сохраняет в базу отчеты
+    """
     try:
         send = send_mail(
             subject=newsletter.message.title,
@@ -24,25 +29,46 @@ def send_newsletter(newsletter: Newsletter):
             recipient_list=[i.email for i in newsletter.clients.all()],
             fail_silently=False
         )
-        NewsletterReport.objects.create(
-            newsletter=newsletter,
-            is_success=bool(send),
-            next_send=datetime.now(ZONE) + PERIOD_DELTA[newsletter.period] if newsletter.period != 'once' else None
-        )
+        if no_report:
+            print('Success!')
+        else:
+            NewsletterReport.objects.create(
+                newsletter=newsletter,
+                is_success=bool(send),
+                next_send=datetime.now(ZONE) + PERIOD_DELTA[newsletter.period] if newsletter.period != 'once' else None
+            )
     except smtplib.SMTPException as e:
-        NewsletterReport.objects.create(
-            newsletter=newsletter,
-            is_success=False,
-            report=e
-        )
+        if no_report:
+            print(f"Error: {e}")
+        else:
+            NewsletterReport.objects.create(
+                newsletter=newsletter,
+                is_success=False,
+                report=e
+            )
     except Exception as e:
-        NewsletterReport.objects.create(
-            newsletter=newsletter,
-            is_success=False,
-            report=e
-        )
+        if no_report:
+            print(f"Error: {e}")
+        else:
+            NewsletterReport.objects.create(
+                newsletter=newsletter,
+                is_success=False,
+                report=e
+            )
 
 def update_next_send(report: NewsletterReport):
-    report.next_send = datetime.now(ZONE) + PERIOD_DELTA[newsletter.period]
+    """
+    Обновляет время следующей отправки (для приостановленных рассылок)
+    """
+    report.next_send = datetime.now(ZONE) + PERIOD_DELTA[report.newsletter.period]
     report.save()
 
+
+def set_cache_controller(controller):
+    """
+    Кэширование контроллера
+    :param controller: контроллер Controller.as_view()
+    """
+    if CACHED_ENABLED:
+        return cache_page(200)(controller)
+    return controller

@@ -1,19 +1,17 @@
-from time import timezone
-import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
-from django_apscheduler.jobstores import DjangoJobStore
+from django_apscheduler.jobstores import DjangoJobStore, MemoryJobStore
 from django_apscheduler.models import DjangoJobExecution
-from datetime import datetime, timedelta
+from datetime import datetime
 from config.settings import ZONE
 from newsletters.models import Newsletter, NewsletterReport
 from newsletters.services import send_newsletter, update_next_send
 
-END_DELTA = timedelta(seconds=60)
-
 
 def send():
+    """
+    Функция для планировщика задач
+    """
     now = datetime.now(ZONE)
-
     active_newsletters = Newsletter.objects.filter(status='active')
     closed_newsletters = Newsletter.objects.filter(status='closed', period__in=['days', 'weeks', 'months'])
     for newsletter in active_newsletters:
@@ -39,7 +37,8 @@ def send():
 
 # Настройка планировщика
 scheduler = BackgroundScheduler()
-scheduler.add_jobstore(DjangoJobStore(), "default")
+scheduler.add_jobstore(MemoryJobStore(), "default") # измените на DjangoJobStore, чтобы сохранять в базу все отчеты
 
-# Добавление задачи на выполнение каждую минуту
+
+# Добавление задачи на выполнение каждые 10 секунд
 scheduler.add_job(send, 'interval', seconds=10, id='mailing_task', replace_existing=True)
